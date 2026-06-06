@@ -1,6 +1,15 @@
 import polars as pl
 from pathlib import Path
 
+class LogLoaderError(Exception):
+    pass
+
+class LogFileNotFoundError(LogLoaderError):
+    pass
+
+class LogLoadingError(LogLoaderError):
+    pass
+
 class LogLoader:
     def __init__(self, paths):
         self._paths = paths
@@ -8,9 +17,17 @@ class LogLoader:
     @classmethod
     def from_path(cls, path):
         file_path = Path(path)
+
+        if not file_path.exists():
+            raise LogFileNotFoundError(f"The path '{path}' does not exist.")
         
         if file_path.is_dir():
-            return cls(list(file_path.glob("*.json")))
+            json_files = list(file_path.glob("*.json"))
+            
+            if not json_files:
+                raise LogFileNotFoundError(f"No '.json' files found in directory '{path}'.")
+            
+            return cls(json_files)
             
         return cls([file_path])
     
@@ -19,7 +36,10 @@ class LogLoader:
         return self._paths
 
     def load(self):
-        return pl.read_ndjson(self.paths)
+        try:
+            return pl.read_ndjson(self.paths)
+        except Exception as e:
+            raise LogLoadingError(f"Failed to load log data: {e}")
 
     
 if __name__ == '__main__':
