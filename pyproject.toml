@@ -1,0 +1,12 @@
+[project]
+name = "matchbook-log-analyser"
+version = "0.1.0"
+description = "A high-performance log analysis tool for parsing and inspecting system activity logs."
+readme = "README.md"
+requires-python = ">=3.10"
+authors = [{ name = "Davin Barron" }]
+dependencies = ["polars", "pytest"]
+
+[tool.pytest.ini_options]
+pythonpath = ["."]
+testpaths = ["tests"]
