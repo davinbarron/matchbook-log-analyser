@@ -1,5 +1,5 @@
-from pathlib import Path
 import polars as pl
+from pathlib import Path
 
 class LogLoader:
     def __init__(self, paths):
@@ -13,9 +13,13 @@ class LogLoader:
             return cls(list(file_path.glob("*.json")))
             
         return cls([file_path])
+    
+    @property
+    def paths(self):
+        return self._paths
 
     def load(self):
-        return pl.read_ndjson(self._paths)
+        return pl.read_ndjson(self.paths)
 
     
 if __name__ == '__main__':
