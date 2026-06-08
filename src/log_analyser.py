@@ -36,6 +36,19 @@ class LogAnalyser:
 
         return ip_ranking[LogColumns.CLIENT_IP][0]
 
+    def get_top_client_method_breakdown(self):
+        top_ip = self.get_top_api_client()
+
+        if not top_ip:
+            return None
+
+        return (
+            self.df.filter(pl.col(LogColumns.CLIENT_IP) == top_ip)
+            .group_by(LogColumns.CLIENT_REQUEST_METHOD)
+            .agg(pl.len().alias("count"))
+            .sort("count", descending=True)
+        )
+
 
 if __name__ == "__main__":
     from yaml_loader import YamlLoader
@@ -48,4 +61,5 @@ if __name__ == "__main__":
     # print(analyser.get_login_summary())
     # print(analyser.get_unique_ip_count())
     # print(analyser.get_ip_call_ranking())
-    print(analyser.get_top_api_client())
+    # print(analyser.get_top_api_client())
+    print(analyser.get_top_client_method_breakdown())
