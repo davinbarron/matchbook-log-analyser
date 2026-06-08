@@ -28,6 +28,14 @@ class LogAnalyser:
             .sort("count", descending=True)
         )
 
+    def get_top_api_client(self):
+        ip_ranking = self.get_ip_call_ranking()
+
+        if ip_ranking.is_empty():
+            return None
+
+        return ip_ranking[LogColumns.CLIENT_IP][0]
+
 
 if __name__ == "__main__":
     from yaml_loader import YamlLoader
@@ -35,8 +43,9 @@ if __name__ == "__main__":
 
     schema = YamlLoader.from_path("configs/schema_metadata.yaml").get_schema()
     df = LogLoader.from_path("data/logs").load(schema)
-
     analyser = LogAnalyser(df)
-    print(analyser.get_login_summary())
-    print(analyser.get_unique_ip_count())
-    print(analyser.get_ip_call_ranking())
+
+    # print(analyser.get_login_summary())
+    # print(analyser.get_unique_ip_count())
+    # print(analyser.get_ip_call_ranking())
+    print(analyser.get_top_api_client())
