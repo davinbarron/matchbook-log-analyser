@@ -18,6 +18,9 @@ class LogAnalyser:
             .agg(pl.len().alias("count"))
         )
 
+    def get_unique_ip_count(self):
+        return self.df[LogColumns.CLIENT_IP].n_unique()
+
 
 if __name__ == "__main__":
     from yaml_loader import YamlLoader
@@ -28,3 +31,4 @@ if __name__ == "__main__":
 
     analyser = LogAnalyser(df)
     print(analyser.get_login_summary())
+    print(analyser.get_unique_ip_count())
