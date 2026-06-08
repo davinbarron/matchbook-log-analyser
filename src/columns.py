@@ -1,0 +1,27 @@
+from enum import Enum
+
+
+class LogColumns(str, Enum):
+    CACHE_RESPONSE_STATUS = "CacheResponseStatus"
+    CLIENT_ASN = "ClientASN"
+    CLIENT_COUNTRY = "ClientCountry"
+    CLIENT_IP = "ClientIP"
+    CLIENT_REQUEST_HOST = "ClientRequestHost"
+    CLIENT_REQUEST_METHOD = "ClientRequestMethod"
+    CLIENT_REQUEST_URI = "ClientRequestURI"
+    CLIENT_REQUEST_UA = "ClientRequestUserAgent"
+    EDGE_COLO_ID = "EdgeColoID"
+    EDGE_END_TIMESTAMP = "EdgeEndTimestamp"
+    EDGE_RATE_LIMIT_ACTION = "EdgeRateLimitAction"
+    EDGE_RATE_LIMIT_ID = "EdgeRateLimitID"
+    EDGE_RESPONSE_BYTES = "EdgeResponseBytes"
+    EDGE_RESPONSE_STATUS = "EdgeResponseStatus"
+    EDGE_START_TIMESTAMP = "EdgeStartTimestamp"
+    ORIGIN_IP = "OriginIP"
+    ORIGIN_RESPONSE_STATUS = "OriginResponseStatus"
+    ORIGIN_RESPONSE_TIME = "OriginResponseTime"
+    RAY_ID = "RayID"
+    WAF_ACTION = "WAFAction"
+    WAF_FLAGS = "WAFFlags"
+    WAF_RULE_ID = "WAFRuleID"
+    ZONE_ID = "ZoneID"
