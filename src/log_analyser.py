@@ -56,6 +56,9 @@ class LogAnalyser:
             .sort("count", descending=True)
         )
 
+    def get_client_activity(self, ip_address):
+        return self.df.filter(pl.col(LogColumns.CLIENT_IP) == ip_address)
+
 
 if __name__ == "__main__":
     from yaml_loader import YamlLoader
@@ -70,4 +73,5 @@ if __name__ == "__main__":
     # print(analyser.get_ip_call_ranking())
     # print(analyser.get_top_api_client())
     # print(analyser.get_top_client_method_breakdown())
-    print(analyser.get_country_request_count())
+    # print(analyser.get_country_request_count())
+    print(analyser.get_client_activity("162.13.194.49"))
