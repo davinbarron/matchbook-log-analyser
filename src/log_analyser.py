@@ -49,6 +49,13 @@ class LogAnalyser:
             .sort("count", descending=True)
         )
 
+    def get_country_request_count(self):
+        return (
+            self.df.group_by(LogColumns.CLIENT_COUNTRY)
+            .agg(pl.len().alias("count"))
+            .sort("count", descending=True)
+        )
+
 
 if __name__ == "__main__":
     from yaml_loader import YamlLoader
@@ -62,4 +69,5 @@ if __name__ == "__main__":
     # print(analyser.get_unique_ip_count())
     # print(analyser.get_ip_call_ranking())
     # print(analyser.get_top_api_client())
-    print(analyser.get_top_client_method_breakdown())
+    # print(analyser.get_top_client_method_breakdown())
+    print(analyser.get_country_request_count())
