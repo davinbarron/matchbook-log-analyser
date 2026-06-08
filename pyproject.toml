@@ -5,7 +5,7 @@ description = "A high-performance log analysis tool for parsing and inspecting s
 readme = "README.md"
 requires-python = ">=3.10"
 authors = [{ name = "Davin Barron" }]
-dependencies = ["polars", "pytest", "pyyaml"]
+dependencies = ["polars", "pytest", "pyyaml", "streamlit"]
 
 [tool.pytest.ini_options]
 pythonpath = ["src"]
