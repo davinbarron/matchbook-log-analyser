@@ -1,8 +1,7 @@
-# tests/test_log_analyser.py
 import pytest
 import polars as pl
-from src.columns import LogColumns
-from src.log_analyser import LogAnalyser
+from columns import LogColumns
+from log_analyser import LogAnalyser
 
 
 @pytest.fixture

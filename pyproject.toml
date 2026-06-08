@@ -8,5 +8,5 @@ authors = [{ name = "Davin Barron" }]
 dependencies = ["polars", "pytest", "pyyaml"]
 
 [tool.pytest.ini_options]
-pythonpath = ["."]
+pythonpath = ["src"]
 testpaths = ["tests"]
