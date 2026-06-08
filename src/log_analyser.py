@@ -21,6 +21,13 @@ class LogAnalyser:
     def get_unique_ip_count(self):
         return self.df[LogColumns.CLIENT_IP].n_unique()
 
+    def get_ip_call_ranking(self):
+        return (
+            self.df.group_by(LogColumns.CLIENT_IP)
+            .agg(pl.len().alias("count"))
+            .sort("count", descending=True)
+        )
+
 
 if __name__ == "__main__":
     from yaml_loader import YamlLoader
@@ -32,3 +39,4 @@ if __name__ == "__main__":
     analyser = LogAnalyser(df)
     print(analyser.get_login_summary())
     print(analyser.get_unique_ip_count())
+    print(analyser.get_ip_call_ranking())
