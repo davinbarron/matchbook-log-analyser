@@ -5,6 +5,17 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.3.0] - 2026-06-08
+
+### Added
+
+- `get_schema` method added to the YAMLLoader class.
+- Schema enforcement support to `LogLoader.load`.
+
+### Changed
+
+- Updated `schema_metadata.yaml` types to use JSON-compatible types `Int64` and `String`.
+
 ## [0.2.0] - 2026-06-07
 
 ### Added
