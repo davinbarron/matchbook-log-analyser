@@ -1,4 +1,5 @@
 import polars as pl
+from columns import LogColumns
 
 
 class LogAnalyser:
@@ -8,10 +9,12 @@ class LogAnalyser:
     def get_login_summary(self):
         return (
             self.df.filter(
-                pl.col("ClientRequestMethod").eq("POST"),
-                pl.col("ClientRequestURI").eq("/bpapi/rest/security/session"),
+                pl.col(LogColumns.CLIENT_REQUEST_METHOD).eq("POST"),
+                pl.col(LogColumns.CLIENT_REQUEST_URI).eq(
+                    "/bpapi/rest/security/session"
+                ),
             )
-            .group_by("EdgeResponseStatus")
+            .group_by(LogColumns.EDGE_RESPONSE_STATUS)
             .agg(pl.len().alias("count"))
         )
 
