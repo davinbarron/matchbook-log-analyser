@@ -70,10 +70,19 @@ def render_bar_chart(x, y, y_label):
         color_continuous_scale="Blues",
         labels={"x": "", "y": y_label},
     )
-    fig.update_traces(textfont_size=16)
+    fig.update_traces(
+        textfont_size=14,
+        textposition="outside",
+        texttemplate="%{x:,.0f}",
+        cliponaxis=False,
+    )
     fig.update_yaxes(type="category", categoryorder="total ascending")
     fig.update_xaxes(showticklabels=False, showgrid=False)
-    fig.update_layout(coloraxis_showscale=False)
+    fig.update_layout(
+        coloraxis_showscale=False,
+        margin=dict(t=10, b=10, l=10, r=40),
+        height=380,
+    )
     st.plotly_chart(fig, use_container_width=True)
 
 
@@ -86,7 +95,7 @@ def render_donut_chart(values, names):
     )
     fig.update_traces(
         textposition="outside",
-        textinfo="label+percent",
+        texttemplate="%{label}<br>%{value:,} (%{percent})",
         textfont=dict(size=14, color="#FFFFFF"),
         insidetextorientation="radial",
     )
