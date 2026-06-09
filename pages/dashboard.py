@@ -120,16 +120,21 @@ def render_search_bar(label, placeholder):
 
 
 def render_kpis(analyser):
-    cols = st.columns(2)
+    cols = st.columns(3)
+    render_metric_card(
+        label="Total Login Attempts",
+        value=analyser.get_total_login_count(),
+        column=cols[0],
+    )
     render_metric_card(
         label="Unique Client Connections",
         value=analyser.get_unique_ip_count(),
-        column=cols[0],
+        column=cols[1],
     )
     render_metric_card(
         label="Most Active Client IP",
         value=analyser.get_top_api_client(),
-        column=cols[1],
+        column=cols[2],
     )
 
 
