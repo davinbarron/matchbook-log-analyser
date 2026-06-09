@@ -1,5 +1,6 @@
 import plotly.express as px
 import streamlit as st
+import polars as pl
 
 from src.columns import LogColumns
 from src.log_analyser import LogAnalyser
@@ -96,6 +97,14 @@ def render_donut_chart(values, names):
     st.plotly_chart(fig, use_container_width=True)
 
 
+def render_data_table(df):
+    st.dataframe(df, use_container_width=True, hide_index=True)
+
+
+def render_search_bar(label, placeholder):
+    return st.text_input(label, placeholder=placeholder).strip()
+
+
 # ---------------------------------------------------------------------------
 # Panels
 # ---------------------------------------------------------------------------
@@ -179,6 +188,31 @@ def render_country_distribution(analyser):
     )
 
 
+def render_client_lookup_panel(analyser):
+    st.subheader("Client Activity Lookup")
+
+    search_ip = render_search_bar(
+        label="Search by Client IP Address:",
+        placeholder="Type a full or partial IP (e.g., 162.13 or leave empty to view all)...",
+    )
+
+    if not search_ip:
+        activity_df = analyser.df
+        st.caption(f"Displaying full dataset: ({len(activity_df):,} rows)")
+    else:
+        activity_df = analyser.df.filter(
+            pl.col(LogColumns.CLIENT_IP).str.contains(search_ip)
+        )
+
+        if activity_df.is_empty():
+            st.warning(f"No logs match the IP: '{search_ip}'")
+            return
+
+        st.success(f"Found {len(activity_df):,} matching records for IP: {search_ip}")
+
+    render_data_table(activity_df.to_pandas())
+
+
 # ---------------------------------------------------------------------------
 # Page
 # ---------------------------------------------------------------------------
@@ -210,6 +244,8 @@ def render_dashboard():
         render_top_client_method_breakdown(analyser)
     with row2_col2:
         render_country_distribution(analyser)
+
+    render_client_lookup_panel(analyser)
 
 
 if __name__ == "__main__":
