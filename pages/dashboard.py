@@ -70,7 +70,7 @@ def render_bar_chart(x, y, y_label):
         labels={"x": "", "y": y_label},
     )
     fig.update_traces(textfont_size=16)
-    fig.update_yaxes(type="category")
+    fig.update_yaxes(type="category", categoryorder="total ascending")
     fig.update_xaxes(showticklabels=False, showgrid=False)
     fig.update_layout(coloraxis_showscale=False)
     st.plotly_chart(fig, use_container_width=True)
@@ -106,6 +106,23 @@ def render_login_summary(analyser):
     )
 
 
+def render_ip_call_ranking(analyser):
+    st.subheader("Top Client IP Volumes")
+    df = analyser.get_ip_call_ranking()
+
+    if df.is_empty():
+        st.info("No client IP logs found.")
+        return
+
+    top = df.head(5)
+    ip_labels = [str(ip) for ip in top[LogColumns.CLIENT_IP]]
+    render_bar_chart(
+        x=top["count"],
+        y=ip_labels,
+        y_label="Client IP",
+    )
+
+
 # ---------------------------------------------------------------------------
 # Page
 # ---------------------------------------------------------------------------
@@ -122,8 +139,15 @@ def render_dashboard():
         st.error(f"Could not load backend log data. Details: {e}")
         return
 
+    # Panel Rendering
+
     render_unique_ip_count(analyser)
-    render_login_summary(analyser)
+
+    row1_col1, row1_col2 = st.columns(2)
+    with row1_col1:
+        render_login_summary(analyser)
+    with row1_col2:
+        render_ip_call_ranking(analyser)
 
 
 if __name__ == "__main__":
