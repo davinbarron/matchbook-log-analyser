@@ -81,12 +81,17 @@ def render_bar_chart(x, y, y_label):
 # ---------------------------------------------------------------------------
 
 
-def render_unique_ip_count(analyser):
-    cols = st.columns(4)
+def render_kpis(analyser):
+    cols = st.columns(2)
     render_metric_card(
         label="Unique Client Connections",
         value=analyser.get_unique_ip_count(),
         column=cols[0],
+    )
+    render_metric_card(
+        label="Most Active Client IP",
+        value=analyser.get_top_api_client(),
+        column=cols[1],
     )
 
 
@@ -141,7 +146,7 @@ def render_dashboard():
 
     # Panel Rendering
 
-    render_unique_ip_count(analyser)
+    render_kpis(analyser)
 
     row1_col1, row1_col2 = st.columns(2)
     with row1_col1:
