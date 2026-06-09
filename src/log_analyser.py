@@ -1,5 +1,5 @@
 import polars as pl
-from columns import LogColumns
+from src.columns import LogColumns
 
 
 class LogAnalyser:
@@ -61,8 +61,8 @@ class LogAnalyser:
 
 
 if __name__ == "__main__":
-    from yaml_loader import YamlLoader
-    from log_loader import LogLoader
+    from src.yaml_loader import YamlLoader
+    from src.log_loader import LogLoader
 
     schema = YamlLoader.from_path("configs/schema_metadata.yaml").get_schema()
     df = LogLoader.from_path("data/logs").load(schema)
