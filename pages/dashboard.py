@@ -162,6 +162,23 @@ def render_top_client_method_breakdown(analyser):
     )
 
 
+def render_country_distribution(analyser):
+    st.subheader("Traffic Volume by Country")
+    df = analyser.get_country_request_count()
+
+    if df.is_empty():
+        st.info("No geographic log records found.")
+        return
+
+    top = df.head(5)
+    country_labels = [str(c) for c in top[LogColumns.CLIENT_COUNTRY]]
+    render_bar_chart(
+        x=top["count"],
+        y=country_labels,
+        y_label="Country",
+    )
+
+
 # ---------------------------------------------------------------------------
 # Page
 # ---------------------------------------------------------------------------
@@ -188,7 +205,11 @@ def render_dashboard():
     with row1_col2:
         render_ip_call_ranking(analyser)
 
-    render_top_client_method_breakdown(analyser)
+    row2_col1, row2_col2 = st.columns(2)
+    with row2_col1:
+        render_top_client_method_breakdown(analyser)
+    with row2_col2:
+        render_country_distribution(analyser)
 
 
 if __name__ == "__main__":
