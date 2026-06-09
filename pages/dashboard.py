@@ -76,6 +76,26 @@ def render_bar_chart(x, y, y_label):
     st.plotly_chart(fig, use_container_width=True)
 
 
+def render_donut_chart(values, names):
+    fig = px.pie(
+        values=values,
+        names=names,
+        hole=0.45,
+        color_discrete_sequence=px.colors.qualitative.D3,
+    )
+    fig.update_traces(
+        textposition="outside",
+        textinfo="label+percent",
+        textfont=dict(size=14, color="#FFFFFF"),
+        insidetextorientation="radial",
+    )
+    fig.update_layout(
+        height=380,
+        showlegend=False,
+    )
+    st.plotly_chart(fig, use_container_width=True)
+
+
 # ---------------------------------------------------------------------------
 # Panels
 # ---------------------------------------------------------------------------
@@ -112,7 +132,7 @@ def render_login_summary(analyser):
 
 
 def render_ip_call_ranking(analyser):
-    st.subheader("Top Client IP Volumes")
+    st.subheader("Top 5 Client by IP Volumes")
     df = analyser.get_ip_call_ranking()
 
     if df.is_empty():
@@ -125,6 +145,20 @@ def render_ip_call_ranking(analyser):
         x=top["count"],
         y=ip_labels,
         y_label="Client IP",
+    )
+
+
+def render_top_client_method_breakdown(analyser):
+    st.subheader("Top HTTP Methods Used by Most Active Client")
+    df = analyser.get_top_client_method_breakdown()
+
+    if df is None or df.is_empty():
+        st.info("No HTTP activity logs found for the top client.")
+        return
+
+    render_donut_chart(
+        values=df["count"],
+        names=df[LogColumns.CLIENT_REQUEST_METHOD],
     )
 
 
@@ -153,6 +187,8 @@ def render_dashboard():
         render_login_summary(analyser)
     with row1_col2:
         render_ip_call_ranking(analyser)
+
+    render_top_client_method_breakdown(analyser)
 
 
 if __name__ == "__main__":
