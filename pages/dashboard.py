@@ -1,0 +1,266 @@
+import plotly.express as px
+import streamlit as st
+import polars as pl
+
+from src.columns import LogColumns
+from src.log_analyser import LogAnalyser
+from src.log_loader import LogLoader
+from src.yaml_loader import YamlLoader
+
+CONFIG_PATH = "configs/schema_metadata.yaml"
+DATA_PATH = "data/logs"
+
+# ---------------------------------------------------------------------------
+# Colour palette
+# ---------------------------------------------------------------------------
+
+PANEL_BG = "#1A1F2E"
+ACCENT_ORANGE = "#F46800"
+TEXT_MUTED = "#8B9BB4"
+
+
+# ---------------------------------------------------------------------------
+# Data loading
+# ---------------------------------------------------------------------------
+
+
+@st.cache_data(show_spinner="Loading data...")
+def load(data_path, config_path):
+    schema = YamlLoader.from_path(config_path).get_schema()
+    df = LogLoader.from_path(data_path).load(schema)
+    return LogAnalyser(df)
+
+
+# ---------------------------------------------------------------------------
+# Components
+# ---------------------------------------------------------------------------
+
+
+def render_metric_card(label, value, column):
+    with column:
+        st.markdown(
+            f"""
+            <div style="
+                background:{PANEL_BG};
+                border-left: 3px solid {ACCENT_ORANGE};
+                border-radius: 6px;
+                padding: 16px 20px;
+            ">
+                <p style="margin:0; font-size:12px; color:{TEXT_MUTED};
+                          text-transform:uppercase; letter-spacing:0.08em;">
+                    {label}
+                </p>
+                <p style="margin:4px 0 0; font-size:32px; font-weight:700;
+                          color:{ACCENT_ORANGE}; line-height:1.1;">
+                    {value}
+                </p>
+            </div>
+            """,
+            unsafe_allow_html=True,
+        )
+
+
+def render_bar_chart(x, y, y_label):
+    fig = px.bar(
+        x=x,
+        y=y,
+        orientation="h",
+        text_auto=True,
+        color=x,
+        color_continuous_scale="Blues",
+        labels={"x": "", "y": y_label},
+    )
+    fig.update_traces(
+        textfont_size=14,
+        textposition="outside",
+        texttemplate="%{x:,.0f}",
+        cliponaxis=False,
+    )
+    fig.update_yaxes(type="category", categoryorder="total ascending")
+    fig.update_xaxes(showticklabels=False, showgrid=False)
+    fig.update_layout(
+        coloraxis_showscale=False,
+        margin=dict(t=10, b=10, l=10, r=40),
+        height=380,
+    )
+    st.plotly_chart(fig, use_container_width=True)
+
+
+def render_donut_chart(values, names):
+    fig = px.pie(
+        values=values,
+        names=names,
+        hole=0.45,
+        color_discrete_sequence=px.colors.qualitative.D3,
+    )
+    fig.update_traces(
+        textposition="outside",
+        texttemplate="%{label}<br>%{value:,} (%{percent})",
+        textfont=dict(size=14, color="#FFFFFF"),
+        insidetextorientation="radial",
+    )
+    fig.update_layout(
+        height=380,
+        showlegend=False,
+    )
+    st.plotly_chart(fig, use_container_width=True)
+
+
+def render_data_table(df):
+    st.dataframe(df, use_container_width=True, hide_index=True)
+
+
+def render_search_bar(label, placeholder):
+    return st.text_input(label, placeholder=placeholder).strip()
+
+
+# ---------------------------------------------------------------------------
+# Panels
+# ---------------------------------------------------------------------------
+
+
+def render_kpis(analyser):
+    cols = st.columns(3)
+    render_metric_card(
+        label="Total Login Attempts",
+        value=analyser.get_total_login_count(),
+        column=cols[0],
+    )
+    render_metric_card(
+        label="Unique Client Connections",
+        value=analyser.get_unique_ip_count(),
+        column=cols[1],
+    )
+    render_metric_card(
+        label="Most Active Client IP",
+        value=analyser.get_top_api_client(),
+        column=cols[2],
+    )
+
+
+def render_login_summary(analyser):
+    st.subheader("Login Summary: Status Code Breakdown")
+    df = analyser.get_login_summary()
+
+    if df.is_empty():
+        st.info("No login endpoint data found.")
+        return
+
+    status_codes = [str(c) for c in df[LogColumns.EDGE_RESPONSE_STATUS]]
+    render_bar_chart(
+        x=df["count"],
+        y=status_codes,
+        y_label="Status Code",
+    )
+
+
+def render_ip_call_ranking(analyser):
+    st.subheader("Top 5 Client by IP Volumes")
+    df = analyser.get_ip_call_ranking()
+
+    if df.is_empty():
+        st.info("No client IP logs found.")
+        return
+
+    top = df.head(5)
+    ip_labels = [str(ip) for ip in top[LogColumns.CLIENT_IP]]
+    render_bar_chart(
+        x=top["count"],
+        y=ip_labels,
+        y_label="Client IP",
+    )
+
+
+def render_top_client_method_breakdown(analyser):
+    st.subheader("Top HTTP Methods Used by Most Active Client")
+    df = analyser.get_top_client_method_breakdown()
+
+    if df is None or df.is_empty():
+        st.info("No HTTP activity logs found for the top client.")
+        return
+
+    render_donut_chart(
+        values=df["count"],
+        names=df[LogColumns.CLIENT_REQUEST_METHOD],
+    )
+
+
+def render_country_distribution(analyser):
+    st.subheader("Traffic Volume by Country")
+    df = analyser.get_country_request_count()
+
+    if df.is_empty():
+        st.info("No geographic log records found.")
+        return
+
+    top = df.head(5)
+    country_labels = [str(c) for c in top[LogColumns.CLIENT_COUNTRY]]
+    render_bar_chart(
+        x=top["count"],
+        y=country_labels,
+        y_label="Country",
+    )
+
+
+def render_client_lookup_panel(analyser):
+    st.subheader("Client Activity Lookup")
+
+    search_ip = render_search_bar(
+        label="Search by Client IP Address:",
+        placeholder="Type a full or partial IP (e.g., 162.13 or leave empty to view all)...",
+    )
+
+    if not search_ip:
+        activity_df = analyser.df
+        st.caption(f"Displaying full dataset: ({len(activity_df):,} rows)")
+    else:
+        activity_df = analyser.df.filter(
+            pl.col(LogColumns.CLIENT_IP).str.contains(search_ip)
+        )
+
+        if activity_df.is_empty():
+            st.warning(f"No logs match the IP: '{search_ip}'")
+            return
+
+        st.success(f"Found {len(activity_df):,} matching records for IP: {search_ip}")
+
+    render_data_table(activity_df.to_pandas())
+
+
+# ---------------------------------------------------------------------------
+# Page
+# ---------------------------------------------------------------------------
+
+
+def render_dashboard():
+    st.title("Matchbook Log Analyser")
+    st.caption("Operational log metrics and endpoint resource usage.")
+    st.divider()
+
+    try:
+        analyser = load(DATA_PATH, CONFIG_PATH)
+    except Exception as e:
+        st.error(f"Could not load backend log data. Details: {e}")
+        return
+
+    # Panel Rendering
+
+    render_kpis(analyser)
+
+    row1_col1, row1_col2 = st.columns(2)
+    with row1_col1:
+        render_login_summary(analyser)
+    with row1_col2:
+        render_ip_call_ranking(analyser)
+
+    row2_col1, row2_col2 = st.columns(2)
+    with row2_col1:
+        render_top_client_method_breakdown(analyser)
+    with row2_col2:
+        render_country_distribution(analyser)
+
+    render_client_lookup_panel(analyser)
+
+
+if __name__ == "__main__":
+    render_dashboard()

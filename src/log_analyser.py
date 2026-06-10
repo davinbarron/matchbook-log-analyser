@@ -1,5 +1,5 @@
 import polars as pl
-from columns import LogColumns
+from src.columns import LogColumns
 
 
 class LogAnalyser:
@@ -17,6 +17,14 @@ class LogAnalyser:
             .group_by(LogColumns.EDGE_RESPONSE_STATUS)
             .agg(pl.len().alias("count"))
         )
+
+    def get_total_login_count(self):
+        login_summary = self.get_login_summary()
+
+        if login_summary.is_empty():
+            return 0
+
+        return login_summary["count"].sum()
 
     def get_unique_ip_count(self):
         return self.df[LogColumns.CLIENT_IP].n_unique()
@@ -61,17 +69,18 @@ class LogAnalyser:
 
 
 if __name__ == "__main__":
-    from yaml_loader import YamlLoader
-    from log_loader import LogLoader
+    from src.yaml_loader import YamlLoader
+    from src.log_loader import LogLoader
 
     schema = YamlLoader.from_path("configs/schema_metadata.yaml").get_schema()
     df = LogLoader.from_path("data/logs").load(schema)
     analyser = LogAnalyser(df)
 
     # print(analyser.get_login_summary())
+    print(analyser.get_total_login_count())
     # print(analyser.get_unique_ip_count())
     # print(analyser.get_ip_call_ranking())
     # print(analyser.get_top_api_client())
     # print(analyser.get_top_client_method_breakdown())
     # print(analyser.get_country_request_count())
-    print(analyser.get_client_activity("162.13.194.49"))
+    # print(analyser.get_client_activity("162.13.194.49"))

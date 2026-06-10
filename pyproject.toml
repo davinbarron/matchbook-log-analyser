@@ -1,12 +1,19 @@
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.backends.legacy:build"
+
 [project]
 name = "matchbook-log-analyser"
-version = "0.4.0"
+version = "0.5.0"
 description = "A high-performance log analysis tool for parsing and inspecting system activity logs."
 readme = "README.md"
 requires-python = ">=3.10"
 authors = [{ name = "Davin Barron" }]
-dependencies = ["polars", "pytest", "pyyaml"]
+dependencies = ["polars", "plotly", "pyyaml", "streamlit"]
+
+[project.optional-dependencies]
+dev = ["pytest"]
 
 [tool.pytest.ini_options]
-pythonpath = ["src"]
+pythonpath = ["."]
 testpaths = ["tests"]

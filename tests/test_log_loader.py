@@ -1,7 +1,7 @@
 import pytest
 import polars as pl
 from pathlib import Path
-from log_loader import LogLoader, LogFileNotFoundError
+from src.log_loader import LogLoader, LogFileNotFoundError
 
 LOGS_DIR = "data/logs"
 SINGLE_LOG_FILE = "data/logs/2021-04-061008.json"
