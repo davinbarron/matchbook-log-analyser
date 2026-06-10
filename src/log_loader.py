@@ -58,7 +58,7 @@ if __name__ == "__main__":
     # print(df.head())
     # print(df2.head())
 
-    from yaml_loader import YamlLoader
+    from src.yaml_loader import YamlLoader
 
     schema = YamlLoader.from_path("configs/schema_metadata.yaml").get_schema()
     log_loader = LogLoader.from_path("data/logs")

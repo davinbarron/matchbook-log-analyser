@@ -1,6 +1,6 @@
 import pytest
 from pathlib import Path
-from yaml_loader import YamlLoader, YamlFileNotFoundError, YamlLoaderError
+from src.yaml_loader import YamlLoader, YamlFileNotFoundError, YamlLoaderError
 
 VALID_YAML_FILE = "configs/schema_metadata.yaml"
 FAKE_PATH = "configs/this_file_does_not_exist.yaml"
